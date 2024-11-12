@@ -1,0 +1,34 @@
+# Ignorar archivos de Python compilados
+__pycache__/
+*.py[cod]
+
+# Ignorar entornos virtuales
+venv/
+myenv/
+.env/
+*.env
+
+# Ignorar archivos de configuración de IDEs
+.vscode/
+.idea/
+
+# Ignorar dependencias de Python
+*.egg-info/
+dist/
+build/
+
+# Archivos temporales
+*.log
+*.bak
+*.swp
+
+# Ignorar archivos de Jupyter Notebooks (si trabajas con notebooks)
+.ipynb_checkpoints/
+
+# Archivos de datos de ejemplo que no necesitan ser rastreados (ej. datasets grandes)
+*.csv
+*.xlsx
+
+# Archivos temporales de sistemas operativos
+.DS_Store
+Thumbs.db
