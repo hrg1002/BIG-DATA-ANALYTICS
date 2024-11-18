@@ -1,6 +1,6 @@
 import pandas as pd
 
-archivo_excel = "C:/Users/hrond/OneDrive/Escritorio/Analytics/Atenciones.xlsx"
+archivo_excel = "./Atenciones.xlsx"
 df = pd.read_excel(archivo_excel)
 
 print(df.head())
