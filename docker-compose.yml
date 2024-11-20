@@ -1,4 +1,5 @@
-version: '3'
+version: '3.8'
+
 services:
   zookeeper:
     image: 'confluentinc/cp-zookeeper:latest'
@@ -20,3 +21,44 @@ services:
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  cassandra:
+    image: 'cassandra:4.0'
+    ports:
+      - '9042:9042'
+    environment:
+      CASSANDRA_CLUSTER_NAME: 'BigDataCluster'
+      CASSANDRA_LISTEN_ADDRESS: 0.0.0.0
+      CASSANDRA_START_RPC: 'true'
+
+  spark-master:
+    image: 'bitnami/spark:latest'
+    environment:
+      SPARK_MODE: 'master'
+    ports:
+      - '7077:7077' # Puerto para el cluster manager
+      - '8080:8080' # Web UI de Spark
+    networks:
+      - spark-network
+
+  spark-worker:
+    image: 'bitnami/spark:latest'
+    depends_on:
+      - spark-master
+    environment:
+      SPARK_MODE: 'worker'
+      SPARK_MASTER_URL: 'spark://spark-master:7077'
+    networks:
+      - spark-network
+
+  spark-submit:
+    image: 'bitnami/spark:latest'
+    depends_on:
+      - spark-master
+    entrypoint: ["/bin/bash", "-c", "while :; do sleep 1; done"]
+    networks:
+      - spark-network
+
+networks:
+  spark-network:
+    driver: bridge
