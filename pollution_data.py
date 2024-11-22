@@ -8,9 +8,13 @@ api_key="f4166084224574682a0539ae00285104"
 # Base URL of the API of OpenWeather
 url="http://api.openweathermap.org/data/2.5/air_pollution"
 
+# This is the Kafka server address
 kafka_server = 'localhost:9092'  
 kafka_topic = 'air_pollution_data'  # Name of the topic to keep the info
-producer = KafkaProducer(bootstrap_servers=[kafka_server],
+
+# We set up the Kafka producer 
+producer = KafkaProducer(
+    bootstrap_servers=[kafka_server],
     value_serializer=lambda v: json.dumps(v).encode('utf-8'))
 
 
@@ -30,8 +34,8 @@ def obtain_pollution_data(lat,lon):
             components = main["components"]
             pollution_description = data["list"][0]["components"]
 
-            pollution_message = {
-                "lat": lat,
+            # Creation of a dic to send to Kafka
+            pollution_message = {"lat": lat,
                 "lon": lon,
                 "aqi": aqi,
                 "pollution": components,
@@ -40,8 +44,9 @@ def obtain_pollution_data(lat,lon):
             # Print the obtained data
             print(f"Air Quality Index (AQI) at coordinates ({lat}, {lon}): {aqi}")
             print(f"The components of pollution in {lat,lon}: {components}")
-            print(f"Description of the poluution: {pollution_description}")
-        
+            print(f"Description of the pollution: {pollution_description}")
+            
+            # Send the message to the specified Kafka topic
             producer.send(kafka_topic, pollution_message)
             producer.flush()
 
@@ -52,6 +57,7 @@ def obtain_pollution_data(lat,lon):
         print(f"An error occured when trying to obtain the information of the pollution: {e}")
 
 if __name__ == "__main__":
+    # Latitude and longitude from Santiago
     lat = -33.4489
     lon = -70.6693
     obtain_pollution_data(lat, lon)
