@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StringType, DoubleType
-
+from kafka import KafkaConsumer
 # Crear una sesión de Spark
 spark = SparkSession.builder \
     .appName("KafkaWeatherConsumer") \
@@ -19,7 +19,6 @@ schema = StructType() \
 # Leer los datos desde Kafka
 kafka_topic = "weather_data"
 kafka_server = "localhost:9092"
-
 df = spark.readStream \
     .format("kafka") \
     .option("kafka.bootstrap.servers", kafka_server) \
@@ -31,6 +30,7 @@ df = spark.readStream \
 weather_df = df.selectExpr("CAST(value AS STRING)") \
     .select(from_json(col("value"), schema).alias("data")) \
     .select("data.*")
+
 
 # Imprimir los datos en consola
 query = weather_df.writeStream \
