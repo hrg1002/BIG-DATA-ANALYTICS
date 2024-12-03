@@ -1,7 +1,7 @@
 # Import the library to use Spark
 from pyspark.sql import SparkSession
 import pandas as pd 
-
+def process_medical_data() :
 # To use it later with Spark, we have to create a session (ChatGPT)
 spark = SparkSession.builder \
     .appName("Excel to Spark") \
