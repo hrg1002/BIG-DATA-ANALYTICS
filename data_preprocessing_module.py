@@ -24,7 +24,8 @@ def process_medical_data() :
         "Covid-19, Virus identificado U07.1"
     ]
     filtered_data = medical_data.filter(medical_data["Total de atenciones de urgencia"].isin(respiratory_diseases))
-    filtered_data.show() 
+    filtered_data.show()
+    spark.stop()  
 from datetime import datetime
 
 def process_weather_data(df):
@@ -49,6 +50,5 @@ def process_weather_data(df):
     )
     
     # Drop temporary columns if not needed
-    df = df.drop("current_month", "current_day")
     
     return df
