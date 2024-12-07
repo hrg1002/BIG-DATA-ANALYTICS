@@ -3,7 +3,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.functions import current_date, month, dayofmonth, expr
 from pyspark.sql.types import StructType, StringType, DoubleType
-
+from pyspark.mllib.feature import Normalizer
 # Crear una sesión de Spark
 def process_medical_data() :
     spark = SparkSession.builder.appName("Parquet Reader").getOrCreate()
@@ -48,6 +48,14 @@ def process_weather_data(df):
             END
         """)
     )
+    # create a Normalizer object with p=2 (L2 normalization) by default
+    normalizer = Normalizer()
+
+    # normalize the DataFrame
+    normalized_pyspark_df = normalizer.transform(df)
+    df = normalized_pyspark_df
+
+
     
     # Drop temporary columns if not needed
     

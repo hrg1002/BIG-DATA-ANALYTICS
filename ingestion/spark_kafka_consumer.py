@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StringType, DoubleType
 from kafka import KafkaConsumer
-from data_preprocessing_module import process_weather_data
+import  procesing.data_preprocessing_module  as pm
 # Crear una sesión de Spark
 spark = SparkSession.builder \
     .appName("KafkaWeatherConsumer") \
@@ -10,12 +10,12 @@ spark = SparkSession.builder \
     .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0") \
     .getOrCreate()
 
+
 # Esquema de los datos recibidos desde Kafka
 schema = StructType() \
-    .add("city", StringType()) \
-    .add("temperature", DoubleType()) \
-    .add("humidity", DoubleType()) \
-    .add("description", StringType())
+    .add("temperatura", DoubleType()) \
+    .add("humedad", DoubleType()) \
+    .add("descripcion", StringType())
 
 # Leer los datos desde Kafka
 kafka_topic = "weather_data"
@@ -30,8 +30,7 @@ df = spark.readStream \
 weather_df = df.selectExpr("CAST(value AS STRING)") \
     .select(from_json(col("value"), schema).alias("data")) \
     .select("data.*")
-
-weather_df = process_weather_data(weather_df)
+weather_df = pm.process_weather_data(weather_df)
 
 # Imprimir los datos en consola
 query = weather_df.writeStream \
@@ -39,5 +38,5 @@ query = weather_df.writeStream \
     .format("console") \
     .start()
 
-
 query.awaitTermination()
+

@@ -3,6 +3,7 @@ from kafka import KafkaProducer
 import requests
 import time
 
+
 # This is the Api Key from OpenWeather which is going to be used
 api_key="bd5bb5aa091b27442966e95e26d17da7"
 
