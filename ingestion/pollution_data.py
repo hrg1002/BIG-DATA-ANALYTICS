@@ -1,6 +1,7 @@
 import json
 from kafka import KafkaProducer
 import requests
+import time 
 
 # This is the Api Key from OpenWeather which is going to be used
 api_key="f4166084224574682a0539ae00285104"
@@ -60,4 +61,6 @@ if __name__ == "__main__":
     # Latitude and longitude from Santiago
     lat = -33.4489
     lon = -70.6693
-    obtain_pollution_data(lat, lon)
+    while True :
+        obtain_pollution_data(lat, lon)
+        time.sleep(5)

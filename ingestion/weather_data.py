@@ -1,6 +1,8 @@
 import json
 from kafka import KafkaProducer
 import requests
+import time
+
 
 # This is the Api Key from OpenWeather which is going to be used
 api_key="bd5bb5aa091b27442966e95e26d17da7"
@@ -58,4 +60,6 @@ def obtain_weather_data(city):
         print(f"An error occured when trying to obtain the information of the weather: {e}")
 
 if __name__ == "__main__":
-    obtain_weather_data("Santiago")
+    while True :
+        obtain_weather_data("Santiago")
+        time.sleep(5)
