@@ -1,3 +1,7 @@
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import datetime, timedelta
+
 import json
 from kafka import KafkaProducer
 import requests
@@ -39,13 +43,11 @@ def obtain_pollution_data(lat,lon):
             pollution_message = {"lat": lat,
                 "lon": lon,
                 "aqi": aqi,
-                "pollution": components,
-                "description": pollution_description}
+                "pollution": components,}
 
             # Print the obtained data
             print(f"Air Quality Index (AQI) at coordinates ({lat}, {lon}): {aqi}")
             print(f"The components of pollution in {lat,lon}: {components}")
-            print(f"Description of the pollution: {pollution_description}")
             
             # Send the message to the specified Kafka topic
             producer.send(kafka_topic, pollution_message)
@@ -56,6 +58,37 @@ def obtain_pollution_data(lat,lon):
 
     except Exception as e:
         print(f"An error occured when trying to obtain the information of the pollution: {e}")
+
+
+# We define the Airflow DAG
+default_args = {
+    "owner": "airflow",
+    "depends_on_past": False,
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retries": 1,
+    "retry_delay": timedelta(minutes=5),
+}
+
+with DAG(
+    "daily_pollution_data",
+    default_args=default_args,
+    description="Fetch daily air pollution data and send to Kafka",
+    schedule_interval="0 0 * * *",  # Every day at midnight
+    start_date=datetime(2023, 1, 1),
+    catchup=False,
+) as dag:
+    # Define the PythonOperator task
+    fetch_pollution_data_task = PythonOperator(
+        task_id="fetch_pollution_data",
+        python_callable=obtain_pollution_data,
+        op_args=[-33.4489, -70.6693],  # Latitude and longitude for Santiago
+    )
+
+    # Task execution
+    fetch_pollution_data_task
+
+
 
 if __name__ == "__main__":
     # Latitude and longitude from Santiago
