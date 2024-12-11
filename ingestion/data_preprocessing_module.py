@@ -49,14 +49,7 @@ def process_weather_data(df):
         """)
     )
     # create a Normalizer object with p=2 (L2 normalization) by default
-    normalizer = Normalizer()
+    #normalizer = Normalizer()
 
     # normalize the DataFrame
-    normalized_pyspark_df = normalizer.transform(df)
-    df = normalized_pyspark_df
-
-
-    
-    # Drop temporary columns if not needed
-    
-    return df
+    return df  

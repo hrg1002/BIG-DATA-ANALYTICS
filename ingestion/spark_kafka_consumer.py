@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StringType, DoubleType
 from kafka import KafkaConsumer
-import  procesing.data_preprocessing_module  as pm
+import  data_preprocessing_module  as pm
 # Crear una sesión de Spark
 spark = SparkSession.builder \
     .appName("KafkaWeatherConsumer") \
