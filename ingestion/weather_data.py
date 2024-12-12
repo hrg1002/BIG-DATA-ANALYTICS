@@ -1,3 +1,7 @@
+from airflow import DAG
+from airflow.operators.python import PythonOperator
+from datetime import datetime, timedelta
+
 import json
 from kafka import KafkaProducer
 import requests
@@ -59,7 +63,30 @@ def obtain_weather_data(city):
 
         print(f"An error occured when trying to obtain the information of the weather: {e}")
 
-if __name__ == "__main__":
-    while True :
-        obtain_weather_data("Santiago")
-        time.sleep(5)
+# Definimos el DAG de Airflow
+default_args = {
+    "owner": "airflow",
+    "depends_on_past": False,
+    "email_on_failure": False,
+    "email_on_retry": False,
+    "retries": 1,
+    "retry_delay": timedelta(minutes=5),
+}
+
+with DAG(
+    "weather_data_dag",
+    default_args=default_args,
+    description="Fetch weather data and send it to Kafka",
+    schedule_interval="0 0 * * *",  # Ejecutar todos los días a medianoche
+    start_date=datetime(2023, 1, 1),
+    catchup=False,
+) as dag:
+    # Definimos la tarea de Airflow que ejecuta la función obtain_weather_data
+    fetch_weather_data_task = PythonOperator(
+        task_id="fetch_weather_data_task",
+        python_callable=obtain_weather_data,
+        op_args=["Santiago"],  # Ciudad para la que obtener los datos del clima
+    )
+
+    # Ejecutamos la tarea
+    fetch_weather_data_task
