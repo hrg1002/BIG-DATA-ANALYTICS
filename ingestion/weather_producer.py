@@ -63,6 +63,7 @@ def obtain_weather_data(city):
 
         print(f"An error occured when trying to obtain the information of the weather: {e}")
 
+<<<<<<< HEAD:ingestion/weather_data.py
 # Definimos el DAG de Airflow
 default_args = {
     "owner": "airflow",
@@ -90,3 +91,7 @@ with DAG(
 
     # Ejecutamos la tarea
     fetch_weather_data_task
+=======
+if __name__ == "__main__":
+        obtain_weather_data("Santiago")
+>>>>>>> 996c66b8f4fc7a1afcd1e4e44fee228a48637668:ingestion/weather_producer.py
