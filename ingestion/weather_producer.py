@@ -60,6 +60,4 @@ def obtain_weather_data(city):
         print(f"An error occured when trying to obtain the information of the weather: {e}")
 
 if __name__ == "__main__":
-    while True :
         obtain_weather_data("Santiago")
-        time.sleep(5)
