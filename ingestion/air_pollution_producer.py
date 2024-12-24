@@ -60,40 +60,19 @@ def obtain_pollution_data(lat,lon):
         print(f"An error occured when trying to obtain the information of the pollution: {e}")
 
 
-# We define the Airflow DAG
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
-}
+def run_air_pollution_producer():
+    lat = -33.4489
+    lon = -70.6693
+    while True:
+        obtain_pollution_data(lat, lon)
+        time.sleep(5)
 
-with DAG(
-    "daily_pollution_data",
-    default_args=default_args,
-    description="Fetch daily air pollution data and send to Kafka",
-    schedule_interval="0 0 * * *",  # Every day at midnight
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-) as dag:
-    # Define the PythonOperator task
-    fetch_pollution_data_task = PythonOperator(
-        task_id="fetch_pollution_data",
-        python_callable=obtain_pollution_data,
-        op_args=[-33.4489, -70.6693],  # Latitude and longitude for Santiago
-    )
-
-    # Task execution
-    fetch_pollution_data_task
-
-
+def consume_air_pollution_data():
+    # Placeholder for the consumer logic
+    pass
 
 if __name__ == "__main__":
     # Latitude and longitude from Santiago
     lat = -33.4489
     lon = -70.6693
-    while True :
-        obtain_pollution_data(lat, lon)
-        time.sleep(5)
+    obtain_pollution_data(lat, lon)

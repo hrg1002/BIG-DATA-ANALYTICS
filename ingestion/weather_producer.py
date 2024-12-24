@@ -1,31 +1,14 @@
-from airflow import DAG
-from airflow.operators.python import PythonOperator
-from datetime import datetime, timedelta
 
 import json
-from kafka import KafkaProducer
 import requests
-import time
-
-
 # This is the Api Key from OpenWeather which is going to be used
-api_key="bd5bb5aa091b27442966e95e26d17da7"
+API_KEY="bd5bb5aa091b27442966e95e26d17da7"
 
 # Base URL of the API of OpenWeather
-url="http://api.openweathermap.org/data/2.5/weather?"
+BASE_URL="http://api.openweathermap.org/data/2.5/weather?"
 
-# This is the Kafka server address
-kafka_server = 'localhost:9092'  
-kafka_topic = 'weather_data'  # Name of the topic to keep the info
-
-# We set up the Kafka producer 
-producer = KafkaProducer(bootstrap_servers=[kafka_server],
-    value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-
-# Function to obtain the climate data of an specific city
-
-def obtain_weather_data(city):
-    complete_url = f"{url}q={city}&appid={api_key}&units=metric" # The URL for the API request
+def produce_weather_data(city):
+    complete_url = f"{BASE_URL}q={city}&appid={API_KEY}&units=metric" # The URL for the API request
     try:
         # Make a request
         response = requests.get(complete_url)
@@ -50,11 +33,8 @@ def obtain_weather_data(city):
             print(f"Temperature in {city}: {temperature} °C")
             print(f"Humidity in {city}: {humidity}%")
             print(f"Description of the weather: {weather_description}")
-        
-            # Sending the weather data to the Kafka topic
-            producer.send(kafka_topic, weather_message)
-            producer.flush()
-
+            # Yield a tuple with None as the key and the weather_message as the value
+            yield (None, json.dumps(weather_message))
         else:
             print("An error occured while obtaining the data from the API. Verify the name of the city or the API Key.")
 
@@ -63,35 +43,3 @@ def obtain_weather_data(city):
 
         print(f"An error occured when trying to obtain the information of the weather: {e}")
 
-<<<<<<< HEAD:ingestion/weather_data.py
-# Definimos el DAG de Airflow
-default_args = {
-    "owner": "airflow",
-    "depends_on_past": False,
-    "email_on_failure": False,
-    "email_on_retry": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
-}
-
-with DAG(
-    "weather_data_dag",
-    default_args=default_args,
-    description="Fetch weather data and send it to Kafka",
-    schedule_interval="0 0 * * *",  # Ejecutar todos los días a medianoche
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-) as dag:
-    # Definimos la tarea de Airflow que ejecuta la función obtain_weather_data
-    fetch_weather_data_task = PythonOperator(
-        task_id="fetch_weather_data_task",
-        python_callable=obtain_weather_data,
-        op_args=["Santiago"],  # Ciudad para la que obtener los datos del clima
-    )
-
-    # Ejecutamos la tarea
-    fetch_weather_data_task
-=======
-if __name__ == "__main__":
-        obtain_weather_data("Santiago")
->>>>>>> 996c66b8f4fc7a1afcd1e4e44fee228a48637668:ingestion/weather_producer.py
