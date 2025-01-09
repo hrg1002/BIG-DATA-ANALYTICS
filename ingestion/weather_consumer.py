@@ -1,7 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StringType, DoubleType
-import data_preprocessing_module as pm
 import json
 
 def transform_fields(value):
@@ -21,10 +20,6 @@ def get_weather_data(message):
         .add("temperatura", DoubleType(), True) \
         .add("humedad", DoubleType(), True) \
         .add("descripcion", StringType(), True)
-
-    # Create an empty DataFrame with the defined schema
-    df = spark.createDataFrame([], schema)
-    print(message)
     # Process each message
     # Decode the message value
     value = json.loads(message.value().decode('utf-8'))
@@ -32,11 +27,11 @@ def get_weather_data(message):
     # Transform the fields
     value = transform_fields(value)
     # Create a DataFrame from the JSON value
-    message_df = spark.createDataFrame([value], schema)
+    weather_df = spark.createDataFrame([value], schema)
 
     # Show the DataFrame
-    df.show()
-    df.write.mode('overwrite').parquet('weather_data.parquet')
+    weather_df.show()
+    weather_df.write.mode('overwrite').parquet('weather_data.parquet')
     # Stop the Spark session
     spark.stop()
 

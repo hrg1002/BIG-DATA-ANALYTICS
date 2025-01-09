@@ -1,43 +1,40 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
 from pyspark.sql.types import StructType, StringType, DoubleType, MapType
+import json
 
-# Create a Spark session
-spark = SparkSession.builder \
-    .appName("KafkaPollutionConsumer") \
-    .master("local") \
-    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0") \
-    .getOrCreate()
+def consume_air_pollution_data(messages):
+    # Create a Spark session
+    spark = SparkSession.builder \
+        .appName("KafkaPollutionConsumer") \
+        .master("local") \
+        .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0") \
+        .getOrCreate()
 
-# Define the schema for the pollution data coming from Kafka
-schema = StructType() \
-    .add("lat", DoubleType()) \
-    .add("lon", DoubleType()) \
-    .add("aqi", StringType()) \
-    .add("pollution", MapType(StringType(), DoubleType())) \
-    .add("description", MapType(StringType(), DoubleType()))  # Adjust based on the actual structure
+    # Define the schema for the pollution data coming from Kafka
+    schema = StructType() \
+        .add("lat", DoubleType()) \
+        .add("lon", DoubleType()) \
+        .add("aqi", StringType()) \
+        .add("pollution", MapType(StringType(), DoubleType())) \
+        .add("description", MapType(StringType(), DoubleType()))  # Adjust based on the actual structure
 
-# Read data from Kafka
-kafka_topic = "air_pollution_data"
-kafka_server = "localhost:9092"
+    # Create an empty DataFrame with the defined schema
+    df = spark.createDataFrame([], schema)
 
-df = spark.readStream \
-    .format("kafka") \
-    .option("kafka.bootstrap.servers", kafka_server) \
-    .option("subscribe", kafka_topic) \
-    .option("startingOffsets", "latest") \
-    .load()
+    # Process each message
+    for message in messages:
+        # Decode the message value
+        value = json.loads(message.value().decode('utf-8'))
 
-# Process the JSON data
-pollution_df = df.selectExpr("CAST(value AS STRING)") \
-    .select(from_json(col("value"), schema).alias("data")) \
-    .select("data.*")
+        # Create a DataFrame from the JSON value
+        message_df = spark.createDataFrame([value], schema)
 
-# Print the data to the console
-query = pollution_df.writeStream \
-    .outputMode("append") \
-    .format("console") \
-    .start()
+        # Union the message DataFrame with the main DataFrame
+        df = df.union(message_df)
 
-# Wait for the query to finish
-query.awaitTermination()
+    # Show the DataFrame
+    df.show()
+
+    # Stop the Spark session
+    spark.stop()
