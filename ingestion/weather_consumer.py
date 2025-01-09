@@ -28,7 +28,7 @@ def get_weather_data(message):
     value = transform_fields(value)
     # Create a DataFrame from the JSON value
     weather_df = spark.createDataFrame([value], schema)
-
+    
     # Show the DataFrame
     weather_df.show()
     weather_df.write.mode('overwrite').parquet('weather_data.parquet')

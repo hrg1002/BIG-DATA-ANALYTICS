@@ -14,7 +14,7 @@ spark = SparkSession.builder \
 def obtain_clinical_data() :
 # To use it later with Spark, we have to create a session (ChatGPT)
 # Specify the path
-    archivo_excel = "./Atenciones.xlsx"
+    archivo_excel = "../Atenciones.xlsx"
 
 # Read the Excel file into a Spark DataFrame
 # inferSchema is to detect the type of data
@@ -29,7 +29,20 @@ def obtain_clinical_data() :
     spark_df = spark_df.dropna()
 
 # Delete duplicated rows
-    spark_df = spark_df.dropDuplicates()
+    medical_data = spark_df.dropDuplicates()
+    respiratory_diseases = [
+        "IRA Alta (J00-J06)",
+        "Influenza (J09-J11)",
+        "Neumonía (J12-J18)",
+        "Bronquitis/bronquiolitis aguda (J20-J21)",
+        "Crisis obstructiva bronquial (J40-J46)",
+        "Otra causa respiratoria (J22, J30-J39, J47, J60-J98)",
+        "Covid-19, Virus no identificado U07.2",
+        "Covid-19, Virus identificado U07.1"
+    ]
+    filtered_data = medical_data.filter(medical_data["Total de atenciones de urgencia"].isin(respiratory_diseases))
+    filtered_data.show()
+    spark.stop()  
 
 # Show the first lines
     spark_df.show()
@@ -39,6 +52,9 @@ def obtain_clinical_data() :
 
 # We close the Spark session when done
 spark.stop()
+
+
+  
 
 # Definir el DAG de Airflow
 default_args = {
@@ -63,3 +79,4 @@ with DAG(
         task_id="process_medical_data_task",
         python_callable=obtain_clinical_data
     )
+    
