@@ -1,5 +1,5 @@
 # Analysisi of the correlation of Weather and pollution data with respiratory issues
-This projects analyzes the correlation  between the weather conditions and pollution indicators in Chile on real-time and predict medical visits
+This projects analyzes the correlatino between the weather conditions and pollution indicators in Chile on real-time and predict medical visits
 ## Usage
 - pip install -r requirements.txt
 ### activate kafka server
@@ -12,3 +12,4 @@ This projects analyzes the correlation  between the weather conditions and pollu
 - python3 pollution_data_consumer
 
 If doesnt work,stop containers and do docker compose up again 
+Ctrl+C to stop
