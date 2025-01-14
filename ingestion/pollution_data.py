@@ -6,6 +6,7 @@ import json
 from kafka import KafkaProducer
 import requests
 import time 
+from cassandra.cluster import Cluster
 
 # This is the Api Key from OpenWeather which is going to be used
 api_key="f4166084224574682a0539ae00285104"
