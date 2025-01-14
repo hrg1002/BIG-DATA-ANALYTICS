@@ -13,15 +13,6 @@ api_key="f4166084224574682a0539ae00285104"
 # Base URL of the API of OpenWeather
 url="http://api.openweathermap.org/data/2.5/air_pollution"
 
-# This is the Kafka server address
-kafka_server = 'localhost:9092'  
-kafka_topic = 'air_pollution_data'  # Name of the topic to keep the info
-
-# We set up the Kafka producer 
-producer = KafkaProducer(
-    bootstrap_servers=[kafka_server],
-    value_serializer=lambda v: json.dumps(v).encode('utf-8'))
-
 
 # Function to obtain the pollution data of an specific city
 def obtain_pollution_data(lat,lon):
@@ -50,8 +41,7 @@ def obtain_pollution_data(lat,lon):
             print(f"The components of pollution in {lat,lon}: {components}")
             
             # Send the message to the specified Kafka topic
-            producer.send(kafka_topic, pollution_message)
-            producer.flush()
+            yield (None, json.dumps(pollution_message))
 
         else:
             print("An error occured while obtaining the data from the API. Verify the name of the city or the API Key.")

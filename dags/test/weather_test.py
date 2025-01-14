@@ -1,8 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 from airflow.models import DagBag
-from airflow.providers.apache.kafka.hooks.kafka import KafkaAdminClientHook
-
+import json
+from airflow.providers.apache.kafka.hooks.client import KafkaAdminClientHook
 class TestWeatherDAG(unittest.TestCase):
 
     def setUp(self):
@@ -31,24 +31,24 @@ class TestWeatherDAG(unittest.TestCase):
 
     @patch('weather_producer.produce_weather_data')
     @patch('weather_consumer.get_weather_data')
-    def test_produce_and_consume(self, mock_consumer, mock_producer):
+    def test_produce_and_consume(self, mock_producer, mock_consumer):
         """Test the producer and consumer functions."""
 
         # Mock producer and consumer functions
-        mock_producer.return_value = True
-        mock_consumer.return_value = [{"location": "chile", "temperature": 25, "humidity": 40}]
+        mock_producer.return_value = [(None, json.dumps({"ciudad": "chile", "temperatura": 25, "humedad": 40, "descripcion": "clear sky"}))]
+        mock_consumer.return_value = None
 
         # Test producer
-        self.assertTrue(mock_producer(), "The producer function did not run correctly")
+        produced_messages = list(mock_producer("chile"))
+        self.assertGreater(len(produced_messages), 0, "The producer function did not produce any messages")
+        self.assertIn("ciudad", json.loads(produced_messages[0][1]), "Produced message does not contain 'ciudad'")
 
         # Test consumer
-        messages = mock_consumer()
-        self.assertIsInstance(messages, list, "Consumer did not return a list of messages")
-        self.assertGreater(len(messages), 0, "Consumer did not return any messages")
-        self.assertEqual(messages[0]["location"], "chile", "Message location does not match")
-        self.assertIn("temperature", messages[0], "Message does not contain temperature data")
+        messages = [MagicMock(value=msg[1].encode('utf-8')) for msg in produced_messages]
+        mock_consumer(messages)
+        self.assertIsNone(mock_consumer.return_value, "The consumer function did not run correctly")
 
-    @patch('airflow.providers.apache.kafka.hooks.kafka.KafkaAdminClientHook')
+    @patch('airflow.providers.apache.kafka.hooks.client.KafkaAdminClientHook')
     def test_kafka_connection(self, mock_kafka_hook):
         """Test Kafka connection setup."""
         # Mock KafkaAdminClientHook

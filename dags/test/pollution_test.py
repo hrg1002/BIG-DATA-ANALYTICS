@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import MagicMock
 from airflow.providers.apache.kafka.operators.produce import ProduceToTopicOperator
 from airflow.providers.apache.kafka.operators.consume import ConsumeFromTopicOperator
-
 # Sample test data for air pollution
 TEST_AIR_POLLUTION_DATA = [
     {"location": "Santiago", "pm2.5": 30, "pm10": 50, "o3": 100},
