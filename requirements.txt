@@ -23,6 +23,7 @@ babel==2.16.0
 blinker==1.9.0
 cachelib==0.9.0
 cachetools==5.5.0
+cassandra-driver==3.29.2
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.4.0
@@ -33,6 +34,7 @@ colorlog==6.9.0
 ConfigUpdater==3.2
 confluent-kafka==2.7.0
 connexion==2.14.2
+cqlsh==6.2.0
 cron-descriptor==1.4.5
 croniter==5.0.1
 cryptography==44.0.0
@@ -55,6 +57,7 @@ Flask-SQLAlchemy==2.5.1
 Flask-WTF==1.2.2
 frozenlist==1.5.0
 fsspec==2024.10.0
+geomet==0.2.1.post1
 google-auth==2.37.0
 google-re2==1.1.20240702
 googleapis-common-protos==1.66.0
@@ -112,6 +115,7 @@ prison==0.2.1
 propcache==0.2.1
 protobuf==5.29.1
 psutil==6.1.0
+pure-sasl==0.6.2
 py4j==0.10.9.7
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
@@ -153,6 +157,7 @@ tzdata==2024.2
 uc-micro-py==1.0.3
 universal_pathlib==0.2.5
 urllib3==2.2.3
+wcwidth==0.2.13
 websocket-client==1.8.0
 Werkzeug==2.2.3
 wirerope==0.4.8
