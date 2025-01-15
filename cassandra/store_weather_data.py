@@ -1,3 +1,4 @@
+import json
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
 
@@ -43,7 +44,7 @@ def insert_weather_data(weather_data):
 def retrieve_weather_data():
     rows = session.execute("SELECT * FROM weather_data.weather")
     for row in rows:
-        print(f"City: {row.city}, Date: {row.date}, Temperature: {row.temperature}, Humidity: {row.humidity}, Pressure: {row.pressure}")
+        print(f"City: {row.city}, Temperature: {row.temperature}, Humidity: {row.humidity}, Description: {row.description}")
 
 # Example usage
 if __name__ == "__main__":
