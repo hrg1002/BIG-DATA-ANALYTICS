@@ -42,7 +42,7 @@ def get_weather_data():
             .select("data.*")
     query = weather_df.writeStream \
         .outputMode("append") \
-        .format("parquet") \
+        .format("console") \
         .trigger(once = True) \
         .start()
 
