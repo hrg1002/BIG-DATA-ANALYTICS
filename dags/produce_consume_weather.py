@@ -1,9 +1,4 @@
-"""
 ### DAG which produces to and consumes from a Kafka cluster
-
-This DAG will produce messages consisting of several elements to a Kafka cluster and consume
-them.
-"""
 import pandas as pd
 import sys
 import os
@@ -49,14 +44,9 @@ def produce_consume_weather():
         poll_timeout=10,
     )
 
-    consume_weather_data_task = ConsumeFromTopicOperator(
+    consume_weather_data_task = PythonOperator(
         task_id="consume_weather_data",
-        kafka_config_id="kafka_weather",
-        topics=[KAFKA_TOPIC],
-        apply_function=get_weather_data,
-        poll_timeout=20,
-        max_messages=20,
-        max_batch_size=20,
+        python_callable = get_weather_data
     )
 
     store_weather_data_task = PythonOperator(

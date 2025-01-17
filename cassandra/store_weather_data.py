@@ -50,11 +50,10 @@ def retrieve_weather_data():
 if __name__ == "__main__":
     # ...existing code...
     processed_weather_data = {
-        'city': 'San Francisco',
-        'date': '2023-10-01',
-        'temperature': 20.5,
-        'humidity': 60.0,
-        'pressure': 1012.0
+        'fecha': '2023-10-01',
+        'temperatura': 20,
+        'humedad': 60,
+        'descripcion': "clear-sky"
     }
     insert_weather_data(processed_weather_data)
     #retrieve_weather_data()
