@@ -5,7 +5,7 @@ from cassandra.auth import PlainTextAuthProvider
 def init() : 
 # Connect to the Cassandra cluster
     auth_provider = PlainTextAuthProvider(username='cassandra', password='password')
-    cluster = Cluster(['127.0.0.1','9042'],auth_provider=auth_provider)
+    cluster = Cluster(['172.17.0.2','9042'],auth_provider=auth_provider)
     session = cluster.connect()
 
     # Create keyspace

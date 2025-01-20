@@ -28,10 +28,14 @@ def get_weather_data():
         .add("temperatura", DoubleType()) \
         .add("humedad", DoubleType()) \
         .add("descripcion", StringType())
+    def process_batch(batch_df, batch_id):
+        first_rows = batch_df.head(5)
+        for row in first_rows:
+            weather_data = row.asDict()
+            df_new = spark.createDataFrame([weather_data])
+            df_new.write.mode("overwrite").parquet("weather_data.parquet")
+            print(weather_data)
 
-    # Leer los datos desde Kafka
-    kafka_topic = "weather_data"
-    kafka_server = "localhost:9092"
     df = spark.readStream \
             .format("kafka") \
             .options(**kafka_options) \
@@ -44,6 +48,7 @@ def get_weather_data():
         .outputMode("append") \
         .format("console") \
         .trigger(once = True) \
+        .foreachBatch(process_batch) \
         .start()
 
     try:

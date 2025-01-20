@@ -15,7 +15,7 @@ url="http://api.openweathermap.org/data/2.5/air_pollution"
 
 
 # Function to obtain the pollution data of an specific city
-def obtain_pollution_data(lat,lon):
+def produce_pollution_data(lat,lon):
     complete_url = f"{url}?lat={lat}&lon={lon}&appid={api_key}" # ChatGPT
     try:
         # Make a request
