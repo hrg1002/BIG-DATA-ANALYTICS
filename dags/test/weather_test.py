@@ -19,7 +19,7 @@ class TestWeatherDAG(unittest.TestCase):
 
     def test_task_count(self):
         """Test that the correct number of tasks is defined."""
-        self.assertEqual(len(self.tasks), 2, "The DAG should have exactly 2 tasks")
+        self.assertEqual(len(self.tasks), 3, "The DAG should have exactly 3 tasks")
 
     def test_task_dependencies(self):
         """Test the dependency between the producer and consumer tasks."""
@@ -56,7 +56,7 @@ class TestWeatherDAG(unittest.TestCase):
 
         # Create Kafka client
         kafka_hook = KafkaAdminClientHook(kafka_config_id="kafka_weather")
-        kafka_client = kafka_hook.get_conn()
+        kafka_client = kafka_hook.get_conn
 
         self.assertIsNotNone(kafka_client, "Kafka connection could not be established")
 
