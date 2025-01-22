@@ -1,5 +1,7 @@
+from datetime import date
 from cassandra.cluster import Cluster
 import os
+import pandas as pd ;
 
 def init():
     # Connect to the Cassandra cluster
@@ -20,6 +22,7 @@ def init():
     session.execute("""
         CREATE TABLE IF NOT EXISTS pollution (
             id UUID PRIMARY KEY,
+            date Date,
             lat FLOAT,
             lon FLOAT,
             aqi INT,
@@ -39,10 +42,11 @@ def init():
 def insert_pollution_data(data):
         session, cluster = init()
         query = """
-            INSERT INTO pollution (id, lat, lon, aqi, co, no, no2, o3, so2, pm2_5, pm10, nh3)
-            VALUES (uuid(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO pollution (id,date, lat, lon, aqi, co, no, no2, o3, so2, pm2_5, pm10, nh3)
+            VALUES (uuid(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         session.execute(query, (
+            data['date'],
             data['lat'],
             data['lon'],
             data['aqi'],
@@ -68,6 +72,7 @@ if __name__ == "__main__":
     # Example processed data
     processed_data = [
         {
+            'date':  pd.Timestamp.today().date(),
             'lat': -33.4489,
             'lon': -70.6693,
             'aqi': 3,
@@ -87,6 +92,7 @@ if __name__ == "__main__":
 
     # Insert the processed data into the table
     for data in processed_data:
+     for i in range(0,10) :
         insert_pollution_data(data)
 
     # Retrieve and print the inserted data

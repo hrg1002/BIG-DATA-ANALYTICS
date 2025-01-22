@@ -1,6 +1,8 @@
+from datetime import date
 import json
 from cassandra.cluster import Cluster
 from cassandra.auth import PlainTextAuthProvider
+import pandas as pd ;
 
 def init() : 
 # Connect to the Cassandra cluster
@@ -50,11 +52,12 @@ def retrieve_weather_data():
 if __name__ == "__main__":
     # ...existing code...
     processed_weather_data = {
-        'fecha': '2023-10-01',
+        'fecha': pd.Timestamp.today().date(),
         'temperatura': 20,
         'humedad': 60,
         'descripcion': "clear-sky"
     }
-    insert_weather_data(processed_weather_data)
+    for i in range(0,9) :
+        insert_weather_data(processed_weather_data)
     #retrieve_weather_data()
     # ...existing code...
