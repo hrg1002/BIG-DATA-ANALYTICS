@@ -44,9 +44,12 @@ def insert_weather_data(weather_data):
 
 # Function to retrieve and print weather data
 def retrieve_weather_data():
+    session, _ = init()
     rows = session.execute("SELECT * FROM weather_data.weather")
     for row in rows:
-        print(f"City: {row.city}, Temperature: {row.temperature}, Humidity: {row.humidity}, Description: {row.description}")
+
+        # Example usage
+        print(f"Fecha: {row.date}, Temperature: {row.temperature}, Humidity: {row.humidity}, Description: {row.description}")
 
 # Example usage
 if __name__ == "__main__":
