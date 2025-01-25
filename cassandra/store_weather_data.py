@@ -32,7 +32,7 @@ def init() :
             max_temperature FLOAT,
             min_temperature FLOAT,
             avg_temperature FLOAT
-        )
+        ) 
     """)
     return session,cluster
 
@@ -55,7 +55,7 @@ def insert_weather_data(weather_data):
 def update_daily_weather(fecha):
     session, _ = init()
     rows = session.execute("""
-        SELECT temperature FROM weather_data.weather WHERE date = %s
+        SELECT temperature FROM weather_data.weather WHERE date = %s ALLOW FILTERING
     """, (fecha,))
     temperatures = [row.temperature for row in rows]
     if temperatures:
@@ -65,9 +65,7 @@ def update_daily_weather(fecha):
         session.execute("""
             INSERT INTO weather_data.daily_weather (date, max_temperature, min_temperature, avg_temperature)
             VALUES (%s, %s, %s, %s)
-            ON CONFLICT (date) DO UPDATE
-            SET max_temperature = %s, min_temperature = %s, avg_temperature = %s
-        """, (fecha, max_temp, min_temp, avg_temp, max_temp, min_temp, avg_temp))
+        """, (fecha, max_temp, min_temp, avg_temp))
         print(f"Updated daily weather for date: {fecha}")
 
 # Function to retrieve and print weather data
@@ -75,9 +73,10 @@ def retrieve_weather_data():
     session, _ = init()
     rows = session.execute("SELECT * FROM weather_data.weather")
     for row in rows:
-
+        row.date = row.date.isoformat()
         # Example usage
         print(f"Fecha: {row.date}, Temperature: {row.temperature}, Humidity: {row.humidity}, Description: {row.description}")
+        return rows
 
 # Function to retrieve and print daily weather data
 def retrieve_daily_weather_data():
@@ -85,6 +84,22 @@ def retrieve_daily_weather_data():
     rows = session.execute("SELECT * FROM weather_data.daily_weather")
     for row in rows:
         print(f"Fecha: {row.date}, Max Temperature: {row.max_temperature}, Min Temperature: {row.min_temperature}, Avg Temperature: {row.avg_temperature}")
+    return rows
+
+def retrieve_daily_weather_by_date(start_date, end_date):
+    session, _ = init()
+    rows = session.execute("""
+        SELECT * FROM weather_data.daily_weather 
+        WHERE date >= %s AND date <= %s
+        ALLOW FILTERING 
+    """, (start_date, end_date))
+    return rows
+
+def retrieve_weather_data_by_date(fecha):
+    session, _ = init()
+    rows = session.execute("SELECT * FROM weather_data.weather WHERE date = %s ALLOW FILTERING", (fecha,))
+    weather_data = []
+    return weather_data
 
 # Example usage
 if __name__ == "__main__":
@@ -97,4 +112,7 @@ if __name__ == "__main__":
     for data in processed_weather_data:
         insert_weather_data(data)
         retrieve_daily_weather_data()
+    start_date = pd.Timestamp('2023-01-01').date()
+    end_date = pd.Timestamp('2023-01-31').date()
+    retrieve_daily_weather_by_date(start_date, end_date)
     # ...existing code...
