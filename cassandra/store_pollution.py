@@ -67,6 +67,15 @@ def retrieve_pollution_data():
     for row in rows:
         print(f"Lat: {row.lat}, Lon: {row.lon}, AQI: {row.aqi}, CO: {row.co}, NO: {row.no}, NO2: {row.no2}, O3: {row.o3}, SO2: {row.so2}, PM2.5: {row.pm2_5}, PM10: {row.pm10}, NH3: {row.nh3}")
 
+def retrieve_pollution_data_by_date(start_date, end_date):
+    session, _ = init()
+    rows = session.execute("""
+        SELECT * FROM pollution 
+        WHERE date >= %s AND date <= %s
+        ALLOW FILTERING 
+    """, (start_date, end_date))
+    return rows
+
 # Example usage
 if __name__ == "__main__":
     # Example processed data
@@ -97,3 +106,9 @@ if __name__ == "__main__":
 
     # Retrieve and print the inserted data
     retrieve_pollution_data()
+
+    start_date = pd.Timestamp('2023-01-01').date()
+    end_date = pd.Timestamp('2023-01-31').date()
+    pollution_data = retrieve_pollution_data_by_date(start_date, end_date)
+    for row in pollution_data:
+        print(f"Date: {row.date}, Lat: {row.lat}, Lon: {row.lon}, AQI: {row.aqi}, CO: {row.co}, NO: {row.no}, NO2: {row.no2}, O3: {row.o3}, SO2: {row.so2}, PM2.5: {row.pm2_5}, PM10: {row.pm10}, NH3: {row.nh3}")

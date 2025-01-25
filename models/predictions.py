@@ -1,63 +1,46 @@
 import logging
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
-from pyspark.sql.types import StringType
-import socket
 import numpy as np
-import tensorflow as tf
+import pandas as pd
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
-from cassandra.cluster import Cluster
-from cassandra.auth import PlainTextAuthProvider
-import pandas as pd
+import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '../cassandra'))
-import retrieve_pollution_data,retrieve_daily_weather_data
-tf.config.set_visible_devices([], 'GPU')
+sys.path.append(os.path.join(os.path.dirname(__file__), '../procesing'))
+from stream_data_preprocessing_module import process_data
+
 # Set up logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', filename='/tmp/application.log', filemode='a')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='/tmp/application.log', filemode='a')
 logger = logging.getLogger()
 
-# Load the pre-trained LSTM model (ensure the model is saved in the correct path)
+# Load the model
 try:
-    model = load_model('models/lstm_model.keras')  
+    model = load_model('models/lstm_model.keras')  # Update with the correct path to your model
     logger.info("LSTM model loaded successfully.")
 except Exception as e:
     logger.error(f"Failed to load model: {e}")
     raise
 
-# Connect to Cassandra
-
-# Function to preprocess and predict using LSTM
-def preprocess_and_predict():
-    # Extract weather and pollution data from Cassandra
-    weather_data = retrieve_daily_weather_data()
-    pollution_data = retrieve_pollution_data()
+def preprocess_and_predict(weather_data, pollution_data):
+    # Use the process_data function to preprocess the data
+    sequence = process_data(pollution_data, weather_data)
     
-    # Merge the data column-wise
-    merged_data = pd.merge(weather_data, pollution_data, on='date')
-    merged_data = merged_data.drop(['lat', 'lon', 'id'], axis=1)
-    sequence = merged_data.head(10).to_numpy()
-    print(sequence.shape)
+    # Fit the MinMaxScaler
+    scaler = MinMaxScaler()
+    sequence_reshaped = sequence.reshape(-1, sequence.shape[-1])
+    scaler.fit(sequence_reshaped)
     
-    # Ensure the dataset is large enough or use .repeat()
-    if len(sequence) == 0:
-        logger.error("Not enough data to create sequences for prediction.")
-        return "Not enough data"
+    # Scale the sequence
+    sequence_scaled = scaler.transform(sequence_reshaped).reshape(sequence.shape)
     
-    # Reshape sequences to match the expected input shape for the LSTM model
-    sequence = sequence.reshape(-1, 10, merged_data.shape[1])
-    print(sequence.shape)
-     # Simulate preprocessing and prediction (for testing, use random data)
     # Make prediction using the LSTM model
-    try :
-        predictions = model.predict(sequence)
-        logger.info(f"Predictions: {predictions}")
+    try:
+        prediction = model.predict(sequence_scaled)
+        prediction_reshaped = prediction.reshape(-1, 1)
+        prediction_reshaped = np.full(10, prediction_reshaped[0][0])
+        prediction = scaler.inverse_transform(prediction_reshaped).reshape(prediction.shape)
+        logger.info(f"Prediction: {prediction[0]}")
+        return prediction
     except Exception as e:
         logger.error(f"Prediction failed: {e}")
         print(e)
         return "Prediction failed"
-    
-    return predictions  # Return the predictions
-
-print(preprocess_and_predict())

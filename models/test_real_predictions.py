@@ -1,3 +1,4 @@
+import math
 import unittest
 from tensorflow.keras.models import load_model
 from sklearn.preprocessing import MinMaxScaler
@@ -63,18 +64,24 @@ class TestRealPredictions(unittest.TestCase):
         
         # Fit the MinMaxScaler
         scaler = MinMaxScaler()
-        scaler.fit(sequence.reshape(-1, sequence.shape[-1]))
+        sequence_reshaped = sequence.reshape(-1, sequence.shape[-1])
+        scaler.fit(sequence_reshaped)
+        
+        # Scale the sequence
+        sequence_scaled = scaler.transform(sequence_reshaped).reshape(sequence.shape)
         
         # Make prediction using the LSTM model
         try:
-            prediction = self.model.predict(sequence)
+            prediction = self.model.predict(sequence_scaled)
+            prediction_reshaped = prediction.reshape(-1, 1)
+            prediction_reshaped = np.full(10, prediction_reshaped[0][0])
+            prediction = scaler.inverse_transform(prediction_reshaped).reshape(prediction.shape)
             logger.info(f"Prediction: {prediction[0]}")
+            return prediction
         except Exception as e:
             logger.error(f"Prediction failed: {e}")
             print(e)
             return "Prediction failed"
-        
-        return prediction[0]  # Return the first prediction (you can adjust this based on your model's output)
 
     def test_real_prediction(self):
         weather_data, pollution_data = self.generate_random_data(num_records=10)

@@ -17,7 +17,7 @@ def obtain_clinical_data() :
     .appName("Excel to Spark") \
     .master("local") \
     .config("spark.jars.packages", "com.crealytics:spark-excel_2.12:0.13.5") \
-    .getOrCreate() 
+    .getOrCreate()                                           
 
     spark_df = spark.read \
             .format("com.crealytics.spark.excel") \
