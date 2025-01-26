@@ -15,7 +15,6 @@ def process_data(pollution_data, weather_data):
     merged_data = pd.merge(weather_data, pollution_data, on='date')
     
     # Remove unnecessary fields
-    merged_data = merged_data.drop(['lat', 'lon', 'id'], axis=1)
     
     # Remove rows with missing data
     merged_data = merged_data.dropna()
