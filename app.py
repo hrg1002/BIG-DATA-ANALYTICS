@@ -4,8 +4,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), 'cassandra'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'models'))
-from store_weather_data import retrieve_daily_weather_by_date
-from store_pollution_data import retrieve_pollution_by_date
+from store_weather_data import retrieve_daily_weather_by_date,retrieve_weather_data_by_date
+from store_pollution import retrieve_pollution_data_by_date
 from predictions import preprocess_and_predict
 
 app = Flask(__name__)
@@ -13,11 +13,8 @@ CORS(app)  # Enable CORS for all routes
 
 @app.route('/api/v1/weatherData', methods=['GET'])
 def endpoint1():
-    response = {
-        "message": "This is the response from endpoint 1",
-        "status": "success"
-    }
-    return jsonify(response)
+    result = retrieve_weather_data_by_date()
+    return result
 
 @app.route('/api/v1/pollutionIndicators', methods=['GET'])
 def endpoint2():
@@ -57,7 +54,7 @@ def endpoint4():
             'min_temperature': row.min_temperature,
             'avg_temperature': row.avg_temperature
         })
-        pollution_data = retrieve_pollution_by_date(start_date, end_date)
+        pollution_data = retrieve_pollution_data_by_date(start_date, end_date)
         pollution_data = sorted(pollution_data, key=lambda row: row.date)
         pollution_indicators = []
         for row in pollution_data:

@@ -95,10 +95,18 @@ def retrieve_daily_weather_by_date(start_date, end_date):
     """, (start_date, end_date))
     return rows
 
-def retrieve_weather_data_by_date(fecha):
+def retrieve_weather_data_by_date():
     session, _ = init()
-    rows = session.execute("SELECT * FROM weather_data.weather WHERE date = %s ALLOW FILTERING", (fecha,))
+    today = date.today()
+    rows = session.execute("SELECT * FROM weather_data.weather WHERE date = %s ALLOW FILTERING", (today,))
     weather_data = []
+    for row in rows:
+        weather_data.append({
+            'fecha': str(row.date),
+            'temperatura': row.temperature,
+            'humedad': row.humidity,
+            'descripcion': row.description
+        })
     return weather_data
 
 # Example usage
@@ -112,7 +120,7 @@ if __name__ == "__main__":
     for data in processed_weather_data:
         insert_weather_data(data)
         retrieve_daily_weather_data()
-    start_date = pd.Timestamp('2023-01-01').date()
-    end_date = pd.Timestamp('2023-01-31').date()
+    start_date = pd.Timestamp('2025-01-25').date()
+    end_date = pd.Timestamp('2025-01-25').date()
     retrieve_daily_weather_by_date(start_date, end_date)
     # ...existing code...
