@@ -76,6 +76,15 @@ def retrieve_pollution_data_by_date(start_date, end_date):
     """, (start_date, end_date))
     return rows
 
+def retrieve_today_pollution_data():
+        session, _ = init()
+        today = date.today()
+        rows = session.execute("""
+            SELECT * FROM pollution 
+            WHERE date = %s
+            ALLOW FILTERING 
+        """, (today,))
+        return rows
 # Example usage
 if __name__ == "__main__":
     # Example processed data
