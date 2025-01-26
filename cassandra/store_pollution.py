@@ -21,8 +21,7 @@ def init():
     # Create a table (if not exists)
     session.execute("""
         CREATE TABLE IF NOT EXISTS pollution (
-            id UUID PRIMARY KEY,
-            date Date,
+            date Date PRIMARY KEY,
             lat FLOAT,
             lon FLOAT,
             aqi INT,
@@ -40,10 +39,31 @@ def init():
 
     # Function to insert data into the table
 def insert_pollution_data(data):
-        session, cluster = init()
+        session, _ = init()
+        existing = session.execute("SELECT date FROM pollution WHERE date = %s", (data['date'],)).one()
+        if existing:
+            update_query = """
+                UPDATE pollution SET lat = %s, lon = %s, aqi = %s, co = %s, no = %s,
+                no2 = %s, o3 = %s, so2 = %s, pm2_5 = %s, pm10 = %s, nh3 = %s
+                WHERE date = %s
+            """
+            session.execute(update_query, (
+                data['lat'],
+                data['lon'],
+                data['aqi'],
+                data['pollution']['co'],
+                data['pollution']['no'],
+                data['pollution']['no2'],
+                data['pollution']['o3'],
+                data['pollution']['so2'],
+                data['pollution']['pm2_5'],
+                data['pollution']['pm10'],
+                data['pollution']['nh3'],
+                data['date']
+            ))
         query = """
-            INSERT INTO pollution (id,date, lat, lon, aqi, co, no, no2, o3, so2, pm2_5, pm10, nh3)
-            VALUES (uuid(), %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO pollution (date, lat, lon, aqi, co, no, no2, o3, so2, pm2_5, pm10, nh3)
+            VALUES ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         session.execute(query, (
             data['date'],

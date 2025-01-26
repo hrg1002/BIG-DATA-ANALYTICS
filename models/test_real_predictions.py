@@ -34,22 +34,19 @@ class TestRealPredictions(unittest.TestCase):
             date = (datetime.now() - timedelta(days=random.randint(0, 365))).date()
             weather_record = {
                 'date': date,
-                'temperature': random.uniform(-10, 40),
-                'humidity': random.uniform(0, 100)
+                'temperature': random.uniform(100, 200),
+                'humidity': random.uniform(80, 100)
             }
             pollution_record = {
                 'date': date,
-                'id': i + 1,
-                'lat': random.uniform(-90, 90),
-                'lon': random.uniform(-180, 180),
                 'aqi': random.randint(0, 500),
                 'co': random.uniform(0, 10),
-                'no2': random.uniform(0, 10),
-                'o3': random.uniform(0, 10),
-                'so2': random.uniform(0, 10),
-                'pm2_5': random.uniform(0, 10),
-                'pm10': random.uniform(0, 10),
-                'nh3': random.uniform(0, 10)
+                'no2': random.uniform(0, 1),
+                'o3': random.uniform(0, 1),
+                'so2': random.uniform(0, 1),
+                'pm2_5': random.uniform(0, 20),
+                'pm10': random.uniform(0, 20),
+                'nh3': random.uniform(0, 1)
             }
             weather_data.append(weather_record)
             pollution_data.append(pollution_record)
@@ -73,7 +70,7 @@ class TestRealPredictions(unittest.TestCase):
         # Make prediction using the LSTM model
         try:
             prediction = self.model.predict(sequence_scaled)
-            prediction_reshaped = prediction.reshape(-1, 1)
+            prediction_reshaped = prediction.reshape(1, -1)
             prediction_reshaped = np.full(10, prediction_reshaped[0][0])
             prediction = scaler.inverse_transform(prediction_reshaped).reshape(prediction.shape)
             logger.info(f"Prediction: {prediction[0]}")
