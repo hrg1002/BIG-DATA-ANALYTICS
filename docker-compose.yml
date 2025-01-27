@@ -47,6 +47,7 @@ services:
       - '8080:8080' # Spark web UI
     volumes:
       - ~/BIG-DATA-ANALYTICS/models:/opt/bitnami/spark/models
+      - ~/BIG-DATA-ANALYTICS/data:/opt/bitnami/spark/data   
     networks:
       - spark-network
 
@@ -62,6 +63,7 @@ services:
       HOME: /tmp
     volumes:
       - ~/BIG-DATA-ANALYTICS/models:/opt/bitnami/spark/models
+      - ~/BIG-DATA-ANALYTICS/data:/opt/bitnami/spark/data   
     networks:
       - spark-network
 

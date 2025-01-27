@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 # Install TensorFlow and Keras
 RUN pip3 install --upgrade pip && \
-    pip3 install tensorflow keras scikit-learn
+    pip3 install tensorflow keras scikit-learn pandas pyarrow
 
 # Switch back to the Spark user for running the container
 USER 1001
