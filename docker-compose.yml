@@ -1,86 +1,47 @@
+version: '3.8'
+
 services:
-  zookeeper:
-    image: 'confluentinc/cp-zookeeper:latest'
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - '2181:2181'
-    networks:
-      - spark-network
-
-  kafka:
-    image: 'confluentinc/cp-kafka:latest'
-    depends_on:
-      - zookeeper
-    ports:
-      - '9092:9092'
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    networks:
-      - spark-network
-
   cassandra:
-    image: 'cassandra:4.0'
+    image: cassandra:latest
+    container_name: cassandra
     ports:
-      - '9042:9042'
+      - "9042:9042"
     environment:
-      CASSANDRA_CLUSTER_NAME: 'BigDataCluster'
-      CASSANDRA_START_RPC: 'true'
+      - CASSANDRA_CLUSTER_NAME=Test Cluster
     networks:
-      - spark-network
+      - big-data-network
 
-  spark-master:
-    build:
-      context: models/
+  airflow:
+    image: apache/airflow:latest
+    container_name: airflow_scheduler
     environment:
-      SPARK_MODE: 'master'
-      SPARK_HOME: /opt/bitnami/spark
-      HOME: /tmp
-    ports:
-      - '7077:7077' # Cluster manager port
-      - '8080:8080' # Spark web UI
-    volumes:
-      - ~/BIG-DATA-ANALYTICS/models:/opt/bitnami/spark/models
-    networks:
-      - spark-network
-
-  spark-worker:
-    build:
-      context: models/
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__FERNET_KEY=your_fernet_key
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
     depends_on:
-      - spark-master
-    environment:
-      SPARK_MODE: 'worker'
-      SPARK_MASTER_URL: 'spark://spark-master:7077'
-      SPARK_HOME: /opt/bitnami/spark
-      HOME: /tmp
-    volumes:
-      - ~/BIG-DATA-ANALYTICS/models:/opt/bitnami/spark/models
+      - cassandra
     networks:
-      - spark-network
+      - big-data-network
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow scheduler
+      "
 
-  spark-submit:
-    build:
-      context: models/
-    depends_on:
-      - spark-master
-    environment:
-      SPARK_HOME: /opt/bitnami/spark
-      HOME: /tmp
-    entrypoint: ["/bin/bash", "-c", "while :; do sleep 1; done"]
+  python_app:
+    image: python:3.8-slim
+    container_name: python_app
     volumes:
-      - ~/BIG-DATA-ANALYTICS/models:/opt/bitnami/spark/models
+      - ./app:/app
+    working_dir: /app
+    depends_on:
+      - cassandra
+      - airflow
     networks:
-      - spark-network
+      - big-data-network
+    command: python3 app.py
 
 networks:
-  spark-network:
+  big-data-network:
     driver: bridge
-
-# For executing spark: docker exec -it <spark container id> spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.4 models/spark_streaming.py
